@@ -7,7 +7,7 @@ import Text.Printf
 class Euclidean a where
     quotientRemainder :: a -> a -> (a, a)
 
--- Generates the table / data structure associated with running the extended Euclidean algorithm
+-- Generates the table / data structure associated with running the extended Euclidean algorithm on a divided by b
 euclid :: (Num a, Eq a, Euclidean a) => a -> a -> [(a,a,a,a)]
 euclid a b = eInner [(0, b, 0, 1), (0, a, 1, 0)] where
     -- Stop if previous remainder is 0:
@@ -23,24 +23,23 @@ euclid a b = eInner [(0, b, 0, 1), (0, a, 1, 0)] where
 pad :: Int -> String -> String
 pad n s = s ++ take (n - length s) (repeat ' ')
 
--- Pretty-prints the result of 'euclid'
-printSteps :: (Show a) => [(a,a,a,a)] -> String
-printSteps rows = foldr (++) "" (reverse finalRows) where
+-- Pretty-prints the result of 'euclid', can output (approximate) tex for pasting into arrays
+printSteps :: (Show a) => Bool -> [(a,a,a,a)] -> String
+printSteps tex rows = foldr (++) "" (reverse finalRows) where
     strRows = map (\(a,b,c,d) -> [show a, show b, show c, show d]) rows
     maxLength = maximum $ map length (concat strRows)
     padRows = map (map (pad maxLength)) strRows
-    finalRows = map (\[a,b,c,d] -> "| " ++ a ++ " | " ++ b ++ " | " ++ c ++ " | " ++ d ++ " |\n") padRows
+    leftChar = if tex then "" else "| "
+    sepChar = if tex then " & " else " | "
+    rightChar = if tex then "\\\\\n" else " |\n"
+    finalRows = map (\[a,b,c,d] -> leftChar ++ a ++ sepChar ++ b ++ sepChar ++ c ++ sepChar ++ d ++ rightChar) padRows
 
 -- IO actions that output the result of running the Euclidean algorithm on the input pair:
 
 -- (a,b) does b divided by a
-doEuclid' :: (Num a, Eq a, Show a, Euclidean a) => (a,a) -> IO ()
-doEuclid' = putStrLn . printSteps . uncurry euclid
-
--- (a,b) does a divided by b
 doEuclid :: (Num a, Eq a, Show a, Euclidean a) => (a,a) -> IO ()
-doEuclid = uncurry . flip . curry $ doEuclid'
+doEuclid = putStrLn . printSteps False . uncurry euclid
 
--- For a list
-doMultipleEuclid :: (Num a, Eq a, Show a, Euclidean a) => [(a,a)] -> IO ()
-doMultipleEuclid = sequence_ . map doEuclid
+-- Utility to do the same but print tex
+doEuclidTex :: (Num a, Eq a, Show a, Euclidean a) => (a,a) -> IO ()
+doEuclidTex = putStrLn . printSteps True . uncurry euclid

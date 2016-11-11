@@ -1,5 +1,7 @@
 module Patterns where
 
+import Data.Tuple
+
 import NumberFields
 import Euclid
 
@@ -19,4 +21,4 @@ getPairs :: Int -> [a] -> [(a,a)]
 getPairs n xs = (head xs, head . drop n $ xs) : getPairs n (tail xs)
 
 pattern1 :: Int -> Int -> Int -> [(Qi,Qi)]
-pattern1 upTo pairNum offsetNum = take upTo . getPairs pairNum $ offsetFibs offsetNum
+pattern1 upTo pairNum offsetNum = take upTo . map swap . getPairs pairNum $ offsetFibs offsetNum

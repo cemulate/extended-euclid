@@ -16,10 +16,17 @@ instance Euclidean Integer where
 data Qi = Qi Rational Rational deriving (Eq)
 
 instance Show Qi where
-    show (Qi a b) = sa ++ " + " ++ sb ++ "i" where
-        (a1, a2, b1, b2) = (numerator a, denominator a, numerator b, denominator b)
-        sa = if (a2 == 1) then (show a1) else printf "(%d/%d)" a1 a2
-        sb = if (b2 == 1) then (show b1) else printf "(%d/%d)" b1 b2
+    show (Qi a b)
+        | a1 == 0 && b1 == 0 = "0"
+        | b1 == 0 = sa
+        | a1 == 0 = sb ++ "i"
+        | b1 < 0  = sa ++ " - " ++ (drop 1 sb) ++ "i"
+        | b1 == 0 = sa
+        | b1 > 0  = sa ++ " + " ++ sb ++ "i"
+        where
+            (a1, a2, b1, b2) = (numerator a, denominator a, numerator b, denominator b)
+            sa = if (a2 == 1) then (show a1) else printf (if a1 < 0 then "-(%d/%d)" else "(%d/%d)") (abs a1) a2
+            sb = if (b2 == 1) then (show b1) else printf (if a1 < 0 then "-(%d/%d)" else "(%d/%d)") (abs b1) b2
 
 instance Num Qi where
     fromInteger n = Qi (fromInteger n) 0
